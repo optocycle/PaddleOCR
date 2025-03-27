@@ -1,10 +1,14 @@
 import os
+import shutil
 import time
 import mlflow
+import paddle2onnx
 import yaml
 from dotenv import load_dotenv
 from .base_logger import BaseLogger
 from ppocr.utils.logging import get_logger
+from ppocr.utils.export_model import export
+from ppocr.utils.triton_flavor import log_model as triton_log_model
 
 # Load environment variables from .env file
 load_dotenv()
@@ -24,7 +28,6 @@ class MLflowLogger(BaseLogger):
 
         # Set up MLflow experiment and start the run
         mlflow.set_experiment(self.project)
-        _ = self.run
 
         # If there's a configuration, log it
         if self.config:
@@ -45,14 +48,33 @@ class MLflowLogger(BaseLogger):
         mlflow.log_metrics(updated_metrics, step=step, run_id=self.run.info.run_id) 
 
     def log_model(self, is_best, prefix, metadata=None):
+        if not is_best:
+            return
+
         model_dir = os.path.join(self.save_dir, "..")
+
+        # Log paddle model
         for ext in [".pdparams", ".pdopt", ".states"]:
             model_path = os.path.join(model_dir, prefix + ext)
             if os.path.exists(model_path):
-                mlflow.log_artifact(model_path, artifact_path=f"weights/{prefix}", run_id=self.run.info.run_id)
-        # Log metadata
-        if metadata:
-            mlflow.set_tags(metadata)  # Batch tags if possible
+                mlflow.log_artifact(model_path, artifact_path=f"paddle_models/{prefix}", run_id=self.run.info.run_id)
+
+        # Log ONNX model
+        # Firstly, temporarily export the model to an inference model
+        inference_config = self.config.copy()
+        inference_config["Global"]["pretrained_model"] = os.path.join(model_dir, prefix)
+        inference_config["Global"]["save_inference_dir"] = os.path.join(model_dir, "inference_tmp")
+        export(inference_config)
+        # Now, export the inference model to ONNX
+        model_file = os.path.join(model_dir, "inference_tmp", "inference.pdmodel")
+        params_file = os.path.join(model_dir, "inference_tmp", "inference.pdiparams")
+        os.makedirs(os.path.join(model_dir, "model/1"), exist_ok=True)
+        shutil.copyfile("ppocr/utils/ppocr.pbtxt", os.path.join(model_dir, "model/config.pbtxt")) # TODO: make a generator which will replace the image height and output length using the values from configs
+        paddle2onnx.export(model_file, params_file, os.path.join(model_dir, "model/1/model.onnx"))
+        triton_log_model(os.path.join(model_dir, "model"), artifact_path="models", await_registration_for=10)
+        # Remove local files
+        shutil.rmtree(os.path.join(model_dir, "inference_tmp"))
+        shutil.rmtree(os.path.join(model_dir, "model"))
 
     def log_config(self):
         def flatten_dict(d, parent_key='', sep='.'):

@@ -6,7 +6,7 @@ Global:
   print_batch_step: 10
   save_model_dir: ./output/normal_finetuned_slplates_paddleocr
   save_epoch_step: 50
-  eval_batch_step: [0, 500]
+  eval_batch_step: [0, 250]
   cal_metric_during_train: true
   pretrained_model:
   checkpoints:
@@ -14,7 +14,7 @@ Global:
   use_visualdl: false
   infer_img: doc/imgs_words/ch/word_1.jpg
   character_dict_path: ./ppocr/utils/dict/german_slplates.txt
-  max_text_length: &max_text_length 25
+  max_text_length: &max_text_length 8
   infer_mode: false
   use_space_char: true
   distributed: true

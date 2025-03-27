@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Modifications by radovic (2025)
+# - Added support for MLflow logging (line 42 and lines 904-910)
+# - Save the model parameters and optimizer state dict only every save_epoch_step epochs (line 569)
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
