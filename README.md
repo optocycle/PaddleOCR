@@ -26,7 +26,7 @@ These instructions are based on the guide provided [here](https://paddlepaddle.g
 2. Open the cloned repository and download a pretrained model.
 ```bash
 cd PaddleOCR/
-# Download the pre-trained model of en_PP-OCRv3
+# Download the pre-trained model of en_PP-OCRv3 (the weights can be also found in MinIO)
 wget -P ./pretrain_models/ https://paddleocr.bj.bcebos.com/PP-OCRv3/english/en_PP-OCRv3_rec_train.tar
 # Decompress model parameters
 cd pretrain_models
@@ -52,3 +52,7 @@ mlflow:
   name: <name_of_the_run>  # Name of the MLflow run (e.g., "lp_finetuned")
 ```
 Additionally, create a `.env` file by copying `.env.example` and filling in the correct values."
+
+## 📄 License
+
+This project is released under [Apache License Version 2.0](./LICENSE).

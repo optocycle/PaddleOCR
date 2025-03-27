@@ -87,7 +87,7 @@ Train:
     - ./datasets/pocr_slplates/train.txt
     transforms:
     - DecodeImage:
-        img_mode: BGR
+        img_mode: RGB
         channel_first: false
     - RecConAug:
         prob: 0.5
@@ -118,7 +118,7 @@ Eval:
     - ./datasets/pocr_slplates/val.txt
     transforms:
     - DecodeImage:
-        img_mode: BGR
+        img_mode: RGB
         channel_first: false
     - MultiLabelEncode:
     - RecResizeImg:
