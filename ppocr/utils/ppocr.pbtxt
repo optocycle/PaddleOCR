@@ -1,18 +1,19 @@
 name: "pp_ocr"
 platform: "onnxruntime_onnx"
 backend: "onnxruntime"
-max_batch_size: 1
+max_batch_size: <VAL1>
 input [
   {
     name: "x"
     data_type: TYPE_FP32
-    dims: [ 3, 48, -1 ]
+    dims: [ 3, <VAL2>, -1 ]
   }
 ]
 output [
   {
     name: "softmax_2.tmp_0"
     data_type: TYPE_FP32
-    dims: [ -1, 41 ]
+    dims: [ -1, <VAL3> ]
   }
 ]
+<VAL4>

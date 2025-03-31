@@ -1,12 +1,12 @@
 Global:
   debug: false
   use_gpu: true
-  epoch_num: 500
+  epoch_num: 250
   log_smooth_window: 20
   print_batch_step: 10
   save_model_dir: ./output/normal_finetuned_slplates_paddleocr
   save_epoch_step: 50
-  eval_batch_step: [0, 250]
+  eval_batch_step: [0, 1]
   cal_metric_during_train: true
   pretrained_model:
   checkpoints:
@@ -23,6 +23,9 @@ Global:
 mlflow:
   mlflow_log_every_n_iter: 20
   name: lp_finetuned
+  pbtxt_configs: 
+    max_batch_size: 64
+    dynamic_batching: true
 
 
 Optimizer:

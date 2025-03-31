@@ -21,8 +21,37 @@ def get_or_create_experiment(name):
         experiment = mlflow.get_experiment(experiment_id)
     return experiment
 
+def generate_pbtxt_config_file(config, dest, max_batch_size=1, dynamic_batching=False):
+    template = "ppocr/utils/ppocr.pbtxt"
+    # Load maxium batch size and boolean for dynamic batching
+    if "pbtxt_configs" in config["mlflow"]:
+        max_batch_size = config["mlflow"]["pbtxt_configs"].get("max_batch_size", max_batch_size)
+        dynamic_batching = config["mlflow"]["pbtxt_configs"].get("dynamic_batching", dynamic_batching)
+    
+    # Find the image height
+    try:
+        resized_image_height = {k: v for d in config["Train"]["dataset"]["transforms"] for k, v in d.items()}['RecResizeImg']['image_shape'][1]
+    except KeyError:
+        resized_image_height = -1
+    # Find the output length
+    with open(config["Global"]["character_dict_path"], "rbU") as f:
+        num_lines = sum(1 for _ in f)
+    output_length = num_lines + 2
+
+    # Replace the placeholders in the template
+    with open(template, "r") as f:
+        content = f.read()
+    content = content.replace("<VAL1>", str(max_batch_size))
+    content = content.replace("<VAL2>", str(resized_image_height))
+    content = content.replace("<VAL3>", str(output_length))
+    content = content.replace("<VAL4>", "dynamic_batching {}") if dynamic_batching else content.replace("<VAL4>", "")
+
+    # Write the new file to the destination
+    with open(dest, "w") as f:
+        f.write(content)
+
 class MLflowLogger(BaseLogger):
-    def __init__(self, save_dir=None, config=None, mlflow_log_every_n_iter=1, name="default_run_name", **kwargs):
+    def __init__(self, save_dir=None, config=None, mlflow_log_every_n_iter=1, name="default_run_name", pbtxt_configs={}, **kwargs):
         self.save_dir = save_dir
         self.config = config
         self.kwargs = kwargs
@@ -95,7 +124,7 @@ class MLflowLogger(BaseLogger):
         model_file = os.path.join(model_dir, "inference_tmp", "inference.pdmodel")
         params_file = os.path.join(model_dir, "inference_tmp", "inference.pdiparams")
         os.makedirs(os.path.join(model_dir, "model/1"), exist_ok=True)
-        shutil.copyfile("ppocr/utils/ppocr.pbtxt", os.path.join(model_dir, "model/config.pbtxt")) # TODO: make a generator which will replace the image height and output length using the values from configs
+        generate_pbtxt_config_file(self.config, os.path.join(model_dir, "model/config.pbtxt"))
         paddle2onnx.export(model_file, params_file, os.path.join(model_dir, "model/1/model.onnx"))
         triton_log_model(os.path.join(model_dir, "model"), artifact_path="models", await_registration_for=10)
         # Remove local files
