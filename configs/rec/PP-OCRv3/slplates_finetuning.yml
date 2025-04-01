@@ -6,7 +6,7 @@ Global:
   print_batch_step: 10
   save_model_dir: ./output/normal_finetuned_slplates_paddleocr
   save_epoch_step: 50
-  eval_batch_step: [0, 1]
+  eval_batch_step: [0, 250]
   cal_metric_during_train: true
   pretrained_model:
   checkpoints:
