@@ -8,8 +8,33 @@ readme = "README.md"
 repository = "https://github.com/optocycle/PaddleOCR.git"
 homepage = "https://github.com/optocycle/PaddleOCR"
 
+exclude = [
+  "**/.github/*",
+  "**/applications/*",
+  "**/benchmark/*",
+  "**/configs/*",
+  "**/deploy/*",
+  "**/doc/*",
+  "**/docs/*",
+  "**/overrides/*",
+  "**/ppocr/ext_op/*",
+  "**/ppocr/losses/*",
+  "**/ppocr/metrics/*",
+  "**/ppocr/modeling/*",
+  "**/ppocr/optimizer/*",
+  "**/ppstructure/docs/*",
+  "**/test_tipc/*",
+  "**/tests/*",
+  ".clang_format.hook",
+  ".gitignore",
+  ".pre-commit-config.yaml",
+  ".style.yapf",
+  "mkdocs.yml",
+  "train.sh"
+]
+
 [tool.poetry.dependencies]
-python = ">=3.9" 
+python = ">=3.9"
 paddlepaddle-gpu = { url = "https://paddle-whl.bj.bcebos.com/stable/cu118/paddlepaddle-gpu/paddlepaddle_gpu-3.0.0rc1-cp310-cp310-linux_x86_64.whl" }
 shapely = "*"
 scikit-image = "*"
@@ -30,16 +55,11 @@ fire = ">=0.3.0"
 requests = "*"
 albumentations = "*"
 albucore = "*"
-setuptools = "^78.0.2"
-mlflow = "^2.21.0"
-python-dotenv = "^1.1.0"
-paddle2onnx = "^2.0.0"
-psutil = "^7.0.0"
-ruff = "^0.11.2"
-black = "^25.1.0"
+setuptools = "^78.1.0"
 
 [tool.poetry.scripts]
 paddleocr = "paddleocr.paddleocr:main"
 
-[tool.poetry.package]
-include = ["ppocr", "deploy", "configs", "test_tipc", "overrides", "ppstructure", "applications"]
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
