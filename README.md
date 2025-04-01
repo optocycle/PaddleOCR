@@ -56,3 +56,7 @@ Additionally, create a `.env` file by copying `.env.example` and filling in the 
 ## 📄 License
 
 This project is released under [Apache License Version 2.0](./LICENSE).
+
+### Changes
+In addition to the modifications described in the header of the original files, the following changes have been made:
+- The `setup.py` file has been removed as the project has been switched to using Poetry for dependency management and packaging.

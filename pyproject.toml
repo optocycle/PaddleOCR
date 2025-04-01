@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "paddleocr"
-version = "0.0.1"  # You need to set a version
+version = "0.0.1"
 description = "Fork of PaddleOCR adapted for recognizing characters on German license plates."
 authors = ["PaddlePaddle <Paddle-better@baidu.com>"]
 license = "Apache-2.0"
@@ -40,3 +40,6 @@ black = "^25.1.0"
 
 [tool.poetry.scripts]
 paddleocr = "paddleocr.paddleocr:main"
+
+[tool.poetry.package]
+include = ["src/paddleocr"]
