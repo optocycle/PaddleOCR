@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Modifications by radovic (2025)
+# Modifications by Optocycle GmbH (2025)
 # - Added support for MLflow logging (line 42 and lines 904-910)
 # - Save the model parameters and optimizer state dict only every save_epoch_step epochs (line 569)
 
@@ -542,27 +542,27 @@ def train(
                         epoch=epoch,
                         global_step=global_step,
                     )
-                best_str = "best metric, {}".format(
-                    ", ".join(
-                        ["{}: {}".format(k, v) for k, v in best_model_dict.items()]
+                    best_str = "best metric, {}".format(
+                        ", ".join(
+                            ["{}: {}".format(k, v) for k, v in best_model_dict.items()]
+                        )
                     )
-                )
-                logger.info(best_str)
-                # logger best metric
-                if log_writer is not None:
-                    log_writer.log_metrics(
-                        metrics={
-                            "best_{}".format(main_indicator): best_model_dict[
-                                main_indicator
-                            ]
-                        },
-                        prefix="EVAL",
-                        step=global_step,
-                    )
+                    logger.info(best_str)
+                    # logger best metric
+                    if log_writer is not None:
+                        log_writer.log_metrics(
+                            metrics={
+                                "best_{}".format(main_indicator): best_model_dict[
+                                    main_indicator
+                                ]
+                            },
+                            prefix="EVAL",
+                            step=global_step,
+                        )
 
-                    log_writer.log_model(
-                        is_best=True, prefix="best_accuracy", metadata=best_model_dict
-                    )
+                        log_writer.log_model(
+                            is_best=True, prefix="best_accuracy", metadata=best_model_dict
+                        )
 
             reader_start = time.time()
             

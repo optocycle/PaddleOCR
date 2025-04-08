@@ -19,14 +19,15 @@ This fork includes configurations for fine-tuning PaddleOCR on license plate dat
 
 ## Fine-tuning a model
 
-These instructions are based on the guide provided [here](https://paddlepaddle.github.io/PaddleOCR/latest/en/quick_start.html). 
-1. Install PaddlePaddle
-    - CPU installation: `python -m pip install paddlepaddle==3.0.0rc1 -i https://www.paddlepaddle.org.cn/packages/stable/cpu/`
-    - GPU installation: `python -m pip install paddlepaddle-gpu==3.0.0rc1 -i https://www.paddlepaddle.org.cn/packages/stable/cu118/`
-2. Open the cloned repository and download a pretrained model.
+These instructions are based on the guide provided [here](https://paddlepaddle.github.io/PaddleOCR/main/en/ppocr/model_train/recognition.html). 
+1. Open the cloned repository and install the environment with `poetry`: 
 ```bash
 cd PaddleOCR/
-# Download the pre-trained model of en_PP-OCRv3 (the weights can be also found in MinIO)
+poetry install
+```
+2. Download a pretrained model.
+```bash
+# Download the pre-trained model for en_PP-OCRv3 (the weights can also be found in the home bucket on MinIO)
 wget -P ./pretrain_models/ https://paddleocr.bj.bcebos.com/PP-OCRv3/english/en_PP-OCRv3_rec_train.tar
 # Decompress model parameters
 cd pretrain_models
@@ -36,11 +37,11 @@ cd ..
 3. Ensure your dataset is formatted for PaddleOCR and move it to the `datasets/` directory: `mv /path/to/paddleocr_dataset ./datasets`
 4. Fine-tune the model:
 ```bash
-python3 tools/train.py -c configs/rec/PP-OCRv3/slplates_finetuning.yml -o Global.pretrained_model=pretrain_models/en_PP-OCRv3_rec_train/best_accuracy
+poetry run python3 tools/train.py -c configs/rec/PP-OCRv3/slplates_finetuning.yml -o Global.pretrained_model=pretrain_models/en_PP-OCRv3_rec_train/best_accuracy
 ```
 5. Export the fine-tuned model to an inference model and specify a custom destination directory (e.g., `./slplates_inference_model`):
 ```bash
-python3 tools/export_model.py -c configs/rec/PP-OCRv3/slplates_finetuning.yml -o Global.pretrained_model=output/normal_finetuned_slplates_paddleocr/best_model/model  Global.save_inference_dir=./slplates_inference_model
+poetry run python3 tools/export_model.py -c configs/rec/PP-OCRv3/slplates_finetuning.yml -o Global.pretrained_model=output/normal_finetuned_slplates_paddleocr/best_model/model  Global.save_inference_dir=./slplates_inference_model
 ```
 
 ## Enabling MLflow
@@ -48,8 +49,12 @@ python3 tools/export_model.py -c configs/rec/PP-OCRv3/slplates_finetuning.yml -o
 To enable MLflow logging during fine-tuning, add the following to your configuration file:
 ```yaml
 mlflow:
-  mlflow_log_every_n_iter: <n_iter>  # Log training metrics every n iterations (evaluation metrics are always logged)
+  mlflow_log_every_n_iter: <n_iter>  # Log training metrics every <n_iter> iterations (evaluation metrics are always logged)
   name: <name_of_the_run>  # Name of the MLflow run (e.g., "lp_finetuned")
+  log_only_best_model: <true/false>  # Whether to log only the best model based on its accuracy
+  pbtxt_configs:  # Configuration for generating .pbtxt files to log models in Triton inference server format
+    max_batch_size: <n_samples>  # Maximum batch size for inference
+    dynamic_batching: <true/false>  # Enable or disable dynamic batching for Triton
 ```
 Additionally, create a `.env` file by copying `.env.example` and filling in the correct values."
 
@@ -60,3 +65,4 @@ This project is released under [Apache License Version 2.0](./LICENSE).
 ### Changes
 In addition to the modifications described in the header of the original files, the following changes have been made:
 - The `setup.py` and `MANIFEST.in` files have been removed as the project has been switched to using Poetry for dependency management and packaging.
+- Heavily revised `README.md` to reflect changes and usage for license plate fine-tuning.

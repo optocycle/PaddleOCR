@@ -47,7 +47,8 @@ def generate_pbtxt_config_file(config, dest, max_batch_size=1, dynamic_batching=
     # Find the output length
     with open(config["Global"]["character_dict_path"], "rbU") as f:
         num_lines = sum(1 for _ in f)
-    output_length = num_lines + 2
+    use_space_char = config["Global"].get("use_space_char", False)
+    output_length = num_lines + 1 + int(use_space_char)
 
     # Replace the placeholders in the template
     with open(template, "r") as f:
@@ -73,6 +74,7 @@ class MLflowLogger(BaseLogger):
         save_dir=None,
         config=None,
         mlflow_log_every_n_iter=1,
+        log_only_best_model = False,
         name="default_run_name",
         pbtxt_configs={},
         **kwargs,
@@ -82,6 +84,7 @@ class MLflowLogger(BaseLogger):
         self.kwargs = kwargs
         self._run = None
         self.mlflow_log_every_n_iter = mlflow_log_every_n_iter
+        self.log_only_best_model = log_only_best_model
         self.pbtxt_configs = pbtxt_configs
         self.logger = get_logger()
 
@@ -135,7 +138,7 @@ class MLflowLogger(BaseLogger):
         mlflow.log_metrics(updated_metrics, step=step, run_id=self.run.info.run_id)
 
     def log_model(self, is_best, prefix, metadata=None):
-        if not is_best:
+        if not is_best and self.log_only_best_model:
             return
 
         model_dir = os.path.join(self.save_dir, "..")
