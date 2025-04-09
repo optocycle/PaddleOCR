@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Modifications by Optocycle GmbH (2025)
+# - Added support for MLflow logging (line 42 and lines 904-910)
+# - Save the model parameters and optimizer state dict only every save_epoch_step epochs (line 569)
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -35,7 +39,7 @@ from ppocr.utils.stats import TrainingStats
 from ppocr.utils.save_load import save_model
 from ppocr.utils.utility import print_dict, AverageMeter
 from ppocr.utils.logging import get_logger
-from ppocr.utils.loggers import WandbLogger, Loggers
+from ppocr.utils.loggers import WandbLogger, MLflowLogger, Loggers
 from ppocr.utils import profiler
 from ppocr.data import build_dataloader
 from ppocr.utils.export_model import export
@@ -538,30 +542,31 @@ def train(
                         epoch=epoch,
                         global_step=global_step,
                     )
-                best_str = "best metric, {}".format(
-                    ", ".join(
-                        ["{}: {}".format(k, v) for k, v in best_model_dict.items()]
+                    best_str = "best metric, {}".format(
+                        ", ".join(
+                            ["{}: {}".format(k, v) for k, v in best_model_dict.items()]
+                        )
                     )
-                )
-                logger.info(best_str)
-                # logger best metric
-                if log_writer is not None:
-                    log_writer.log_metrics(
-                        metrics={
-                            "best_{}".format(main_indicator): best_model_dict[
-                                main_indicator
-                            ]
-                        },
-                        prefix="EVAL",
-                        step=global_step,
-                    )
+                    logger.info(best_str)
+                    # logger best metric
+                    if log_writer is not None:
+                        log_writer.log_metrics(
+                            metrics={
+                                "best_{}".format(main_indicator): best_model_dict[
+                                    main_indicator
+                                ]
+                            },
+                            prefix="EVAL",
+                            step=global_step,
+                        )
 
-                    log_writer.log_model(
-                        is_best=True, prefix="best_accuracy", metadata=best_model_dict
-                    )
+                        log_writer.log_model(
+                            is_best=True, prefix="best_accuracy", metadata=best_model_dict
+                        )
 
             reader_start = time.time()
-        if dist.get_rank() == 0:
+            
+        if dist.get_rank() == 0 and epoch > 0 and epoch % save_epoch_step == 0:
             prefix = "latest"
             if uniform_output_enabled:
                 export(config, model, os.path.join(save_model_dir, prefix, "inference"))
@@ -590,7 +595,6 @@ def train(
             if log_writer is not None:
                 log_writer.log_model(is_best=False, prefix="latest")
 
-        if dist.get_rank() == 0 and epoch > 0 and epoch % save_epoch_step == 0:
             prefix = "iter_epoch_{}".format(epoch)
             if uniform_output_enabled:
                 export(config, model, os.path.join(save_model_dir, prefix, "inference"))
@@ -897,6 +901,13 @@ def preprocess(is_train=False):
             "removed in ppocr!"
         )
         log_writer = None
+    if ("use_mlflow" in config["Global"] and config["Global"]["use_mlflow"]) or "mlflow" in config:
+        save_dir = config["Global"]["save_model_dir"]
+        mlflow_save_dir = "{}/mlflow".format(save_dir)
+        mlflow_params = config["mlflow"] if "mlflow" in config else {}
+        os.makedirs(mlflow_save_dir, exist_ok=True)
+        log_writer = MLflowLogger(save_dir=mlflow_save_dir, config=config, **mlflow_params)
+        loggers.append(log_writer)
     if (
         "use_wandb" in config["Global"] and config["Global"]["use_wandb"]
     ) or "wandb" in config:
