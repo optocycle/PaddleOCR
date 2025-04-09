@@ -27,7 +27,7 @@ poetry install
 ```
 2. Download a pretrained model.
 ```bash
-# Download the pre-trained model for en_PP-OCRv3 (the weights can also be found in the home bucket on MinIO)
+# Download the pre-trained model for en_PP-OCRv3 (the weights can also be found in the models.dev bucket on MinIO)
 wget -P ./pretrain_models/ https://paddleocr.bj.bcebos.com/PP-OCRv3/english/en_PP-OCRv3_rec_train.tar
 # Decompress model parameters
 cd pretrain_models
