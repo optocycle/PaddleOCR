@@ -10,9 +10,6 @@ homepage = "https://github.com/optocycle/PaddleOCR"
 
 packages = [
     { include = "ppocr", from = "." },
-    { include = "tools", from = "." },
-    { include = "ppstructure", from = "." },
-    { include = "paddleocr.py", from = "." }
 ]
 
 exclude = [
@@ -24,11 +21,6 @@ exclude = [
   "**/doc/*",
   "**/docs/*",
   "**/overrides/*",
-  "**/ppocr/ext_op/*",
-  "**/ppocr/losses/*",
-  "**/ppocr/metrics/*",
-  "**/ppocr/modeling/*",
-  "**/ppocr/optimizer/*",
   "**/ppstructure/docs/*",
   "**/test_tipc/*",
   "**/tests/*",
@@ -53,7 +45,7 @@ rapidfuzz = "*"
 opencv-python = "*"
 opencv-contrib-python = "*"
 cython = "*"
-Pillow = "*"
+pillow = "^11.3.0"
 pyyaml = "*"
 python-docx = "*"
 beautifulsoup4 = "*"
