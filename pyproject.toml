@@ -10,6 +10,8 @@ homepage = "https://github.com/optocycle/PaddleOCR"
 
 packages = [
     { include = "ppocr", from = "." },
+    { include = "tools", from = "." },
+    { include = "paddleocr", from = "." },
 ]
 
 exclude = [
@@ -33,7 +35,8 @@ exclude = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.9" 
+python = ">=3.9,<4" 
+bce-python-sdk = ">=0.9.35"
 paddlepaddle-gpu = { url = "https://paddle-whl.bj.bcebos.com/stable/cu118/paddlepaddle-gpu/paddlepaddle_gpu-3.0.0rc1-cp310-cp310-linux_x86_64.whl" }
 shapely = "*"
 scikit-image = "*"
@@ -61,6 +64,7 @@ paddle2onnx = "^2.0.0"
 psutil = "^7.0.0"
 ruff = "^0.11.2"
 black = "^25.1.0"
+paddlex = "^3.2.1"
 
 [tool.poetry.scripts]
 paddleocr = "paddleocr:main"
